@@ -24,6 +24,10 @@ const checkApiKey = (req: Request, res: Response, next: NextFunction) => {
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 
+app.get("/", (req: Request, res: Response) => {
+  res.send("Welcome to the Users API");
+});
+
 app.get('/api/v1/users', checkApiKey, async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || DEFAULT_PAGE;
