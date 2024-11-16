@@ -25,7 +25,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to the Users API");
+  res.json({ message: 'Welcome to the API' });
 });
 
 app.get('/api/v1/users', checkApiKey, async (req: Request, res: Response) => {
