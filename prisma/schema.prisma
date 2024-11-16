@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserType {
+  STARTUP
+  BUSINESS
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String
+  email       String?  @unique
+  phoneNumber String?  @unique
+  password    String?
+  image       String   @default("https://res.cloudinary.com/dlriuadjv/image/upload/v1729353205/xbbb0zw6js60dxnq64qj.png")
+  preferences String[]
+
+  accounts Account[]
+  sessions Session[]
+
+  emailVerified DateTime?
+  type          UserType?
+
+  startup  Startup?
+  business Business?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Otp {
+  id          String   @id @default(uuid())
+  email       String?
+  phoneNumber String?
+  otp         String
+  expiry      DateTime
+}
+
+model Startup {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  name                String
+  image               String    @default("https://res.cloudinary.com/dlriuadjv/image/upload/v1729353205/xbbb0zw6js60dxnq64qj.png")
+  registeredName      String?
+  registrationDate    DateTime?
+  websiteUrl          String?
+  email               String?
+  contactNumber       String
+  location            String
+  industry            String
+  sector              String
+  trlLevel            String
+  logoUrl             String?
+  description         String?
+  productStage        String?
+  fundingStage        String?
+  idea                String?
+  problem             String?
+  marketSize          String?
+  dpiitRecognized     Boolean?
+  twoMajorCompetitors String?
+  demoVideoUrl        String?
+  pitchDeckUrl        String?
+  foundersDetail      String?
+  teamSize            String?
+  noOfFte             String?
+  noOfInterns         String?
+  competitors         String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("startup")
+}
+
+model Business {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  image          String        @default("https://res.cloudinary.com/dlriuadjv/image/upload/v1729353205/xbbb0zw6js60dxnq64qj.png")
+  name           String
+  registeredName String?
+  websiteUrl     String?
+  contactNumber  String
+  email          String?
+  location       String
+  category       String
+  categoryTags   String[]
+  description    String?
+  gallery        String[]
+  achievements   Achievement[]
+  opportunities  Opportunity[]
+  services       Services[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("business")
+}
+
+model Achievement {
+  id           String @id @default(uuid())
+  businessId   String
+  name         String
+  organization String
+  year         String
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("achievement")
+}
+
+model Services {
+  id           String @id @default(uuid())
+  businessId   String
+  category     String
+  categoryName String
+  price        String
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("services")
+}
+
+model Opportunity {
+  id                   String    @id @default(uuid())
+  imageUrl             String?
+  type                 String
+  subtype              String?
+  title                String
+  websiteUrl           String?
+  fundingAmount        String?
+  targetIndustry       String?
+  targetSector         String?
+  targetWomenFounder   Boolean?
+  targetProductStage   String[]
+  targetFundingStage   String[]
+  description          String?
+  eligibility          String?
+  bannerUrl            String?
+  startDatetime        DateTime?
+  endDatetime          DateTime?
+  noOfRegistrations    String?
+  questions            Json?
+  registration         String?
+  businessId           String
+  registrationFormLink String?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("opportunity")
+}
